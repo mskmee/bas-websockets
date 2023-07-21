@@ -17,13 +17,14 @@ export default (io: Server) => {
       }
       const room = app.addRoom(title, user);
       socket.join(title);
-      socket.emit('room-joined', title);
+      socket.emit('joined-room', room);
       io.emit('new-room', room);
     });
 
-    socket.on('room-leave', (title, id) => {
-      const room = app.leaveFromRoom(title, id);
+    socket.on('room-leave', (title, userName) => {
+      const room = app.leaveFromRoom(title, userName);
       if (!room) return;
+      io.to(title).emit('room-leave', userName);
       const isRoomDelete = updateDeleteRoom(io, room);
       isRoomDelete && app.rooms.deleteRoom(title);
     });
@@ -32,13 +33,20 @@ export default (io: Server) => {
       socket.join(title);
       const username = socket.handshake.query.username;
       const name = Array.isArray(username) ? username.join('') : username;
-      const room = app.joinUserToRoom(title, {
+      const user = {
         id: socket.id,
         name: name ?? 'user',
         isUserReady: false,
-      });
+      };
+      const room = app.joinUserToRoom(title, user);
       socket.emit('joined-room', room);
+      io.to(title).except(socket.id).emit('new-user', user);
       io.emit('room-update', room);
+    });
+
+    socket.on('change-user-status', (title: string, user: string) => {
+      const updateStatus = app.changeUserReadyStatus(title, user);
+      io.to(title).emit('update-user-status', updateStatus);
     });
   });
 };

@@ -12,12 +12,10 @@ export default (io: Server) => {
     const name = Array.isArray(username) ? username.join('') : username;
     const isUserAdd = app.addUser(name, socket.id);
     if (!isUserAdd) {
-      console.log(name);
       socket.emit('name-error', createErrorMessage(name));
       return;
     }
     socket.emit('rooms', app.getRoomsForEnter());
-    console.log(app.users.users);
     socket.on('disconnect', () => {
       const room = app.disconnectUser(name);
       if (!room) return;

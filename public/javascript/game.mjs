@@ -9,11 +9,8 @@ if (!username) {
 
 const socket = io('', { query: { username } });
 const controller = new MainController(socket);
+controller.init();
 
 socket.on('name-error', (message) => {
   titleErrorHandler(message);
-});
-
-socket.on('rooms', (data) => {
-  controller.lobbyController.renderRooms(data);
 });

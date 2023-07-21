@@ -1,3 +1,4 @@
+import { title } from 'process';
 import { GameRooms } from './models/gameRoom';
 import { GameUsers } from './models/gameUsers';
 import { IGameUser } from './types/interfaces/IGameUser';
@@ -39,8 +40,8 @@ class App {
     return this.rooms.createRoom(title, user);
   };
 
-  leaveFromRoom = (title: string, userId: string) => {
-    return this.rooms.leaveRoom(title, userId);
+  leaveFromRoom = (title: string, userName: string) => {
+    return this.rooms.leaveRoom(title, userName);
   };
 
   isRoomExist = (title: string) => {
@@ -53,6 +54,9 @@ class App {
 
   joinUserToRoom = (title: string, user: IGameUser) => {
     return this.rooms.addUser(title, user);
+  };
+  changeUserReadyStatus = (title: string, userName: string) => {
+    return this.rooms.changeUserStatus(title, userName);
   };
 }
 

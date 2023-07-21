@@ -1,99 +1,51 @@
-import { titleErrorHandler } from '../helpers/titleErrorHandler.mjs';
-import { showInputModal } from '../views/modal.mjs';
 import {
-  appendRoomElement,
-  removeRoomElement,
-  updateNumberOfUsersInRoom,
-} from '../views/room.mjs';
+  appendUserElement,
+  removeUserElement,
+  changeReadyStatus,
+} from '../views/user.mjs';
 
 export class LobbyController {
   constructor(socket) {
-    this.createRoomBtn = document.getElementById('add-room-btn');
-    this.lobbyBlock = document.getElementById('rooms-page');
-    this.gameBlock = document.getElementById('game-page');
-    this.leaveLobbyBtn = document.getElementById('quit-room-btn');
     this.socket = socket;
+    this.usersWrapper = document.getElementById('users-wrapper');
+    this.readyBtn = document.getElementById('ready-btn');
     this.userName = sessionStorage.getItem('username');
-    this.roomTitle = '';
+    this.roomName = '';
   }
 
-  createRoom = () => {
-    let roomName = '';
-    showInputModal({
-      title: 'Enter room name:',
-      onChange: (value) => {
-        roomName = value;
-      },
-      onSubmit: () => {
-        this.socket.emit('room-create', roomName, {
-          id: this.socket.id,
-          name: this.userName,
-          isUserReady: false,
-        });
-      },
+  setUserReady = () => {
+    this.socket.emit('change-user-status', this.roomName, this.userName);
+  };
+
+  renderUser = (user) => {
+    appendUserElement({
+      username: user.name,
+      ready: user.isUserReady,
+      isCurrentUser: user.name === this.userName,
     });
   };
 
-  joinRoom = (title) => {
-    this.socket.emit('join-room', title);
+  renderRoomUsers = (room) => {
+    this.roomName = room.title;
+    room.users.forEach((user) => this.renderUser(user));
   };
 
-  renderRooms = (data) => {
-    data.forEach((element) => {
-      console.log(element);
-      const { title: name, users, maxUsers } = element;
-      const numberOfUsers = `${users.length}/${maxUsers}`;
-      appendRoomElement({
-        name,
-        numberOfUsers,
-        onJoin: this.joinRoom.bind(this, name),
-      });
-    });
-  };
-
-  toggleJoinLobby = (roomTitle) => {
-    this.lobbyBlock.classList.toggle('display-none');
-    this.gameBlock.classList.toggle('display-none');
-    this.roomTitle = roomTitle;
-  };
-
-  leaveRoom = () => {
-    this.socket.emit('room-leave', this.roomTitle, this.socket.id);
-    this.toggleJoinLobby('');
+  leaveRoom = (userName) => {
+    removeUserElement(userName);
+    if (userName === this.userName) {
+      this.usersWrapper.innerHTML = '';
+      this.roomName = '';
+    }
   };
 
   socketEvents = () => {
-    this.socket.on('new-room', (newRoom) => {
-      this.renderRooms([newRoom]);
-    });
-    this.socket.on('room-error', (data) => {
-      titleErrorHandler(data, true);
-    });
-    this.socket.on('room-joined', (roomTitle) => {
-      this.toggleJoinLobby(roomTitle);
-    });
-    this.socket.on('room-left', () => {});
-    this.socket.on('room-update', (roomData) => {
-      const numberOfUsers = `${roomData.users.length}/${roomData.maxUsers}`;
-      updateNumberOfUsersInRoom({
-        name: roomData.title,
-        numberOfUsers,
-      });
-    });
-    this.socket.on('joined-room', (room) => {
-      this.toggleJoinLobby(room.title);
-    });
-    this.socket.on('room-delete', (room) => {
-      removeRoomElement(room.title);
-    });
+    this.socket.on('new-user', (user) => this.renderUser(user));
+    this.socket.on('joined-room', (room) => this.renderRoomUsers(room));
+    this.socket.on('room-leave', (userName) => this.leaveRoom(userName));
+    this.socket.on('update-user-status', (user) => changeReadyStatus(user));
   };
-
   init = () => {
     this.socketEvents();
-    this.createRoomBtn.addEventListener('click', this.createRoom);
-    document.addEventListener('beforeunload', () => {
-      socket.disconnect();
-    });
-    this.leaveLobbyBtn.addEventListener('click', this.leaveRoom);
+    this.readyBtn.addEventListener('click', this.setUserReady);
   };
 }

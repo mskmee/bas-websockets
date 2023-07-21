@@ -1,6 +1,7 @@
 import { MAXIMUM_USERS_FOR_ONE_ROOM } from '../socket/config';
 import { IGameRoom } from '../types/interfaces/IGameRoom';
 import { IGameUser } from '../types/interfaces/IGameUser';
+import { IUpdateUserReadyStatus } from '../types/interfaces/IUpdateUserReadyStatus';
 
 export class GameRooms {
   rooms: Map<string, IGameRoom>;
@@ -40,10 +41,10 @@ export class GameRooms {
     return this.rooms.get(title);
   }
 
-  leaveRoom = (title: string, userId: string) => {
+  leaveRoom = (title: string, userName: string) => {
     const room = this.getRoom(title);
     if (!room) return;
-    const updateUsers = room.users.filter((user) => user.id !== userId);
+    const updateUsers = room.users.filter((user) => user.name !== userName);
     this.rooms.set(title, { ...room, users: updateUsers });
     return this.getRoom(title);
   };
@@ -56,5 +57,20 @@ export class GameRooms {
         return room;
       }
     }
+  };
+
+  changeUserStatus = (title: string, userName: string) => {
+    const room = this.getRoom(title);
+    if (!room) return null;
+    const userToUpdate = room.users.find((user) => user.name === userName);
+    if (!userToUpdate) return null;
+    userToUpdate.isUserReady = !userToUpdate.isUserReady;
+
+    this.rooms.set(title, { ...room, users: [...room.users] });
+    const userStatus: IUpdateUserReadyStatus = {
+      ready: userToUpdate.isUserReady,
+      username: userName,
+    };
+    return userStatus;
   };
 }
