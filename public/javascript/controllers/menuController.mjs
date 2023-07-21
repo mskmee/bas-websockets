@@ -66,9 +66,15 @@ export class MenuController {
     this.socket.on('new-room', (newRoom) => this.renderRooms([newRoom]));
     this.socket.on('room-error', (data) => titleErrorHandler(data, true));
     this.socket.on('room-update', (roomData) => {
-      const numberOfUsers = `${roomData.users.length}/${roomData.maxUsers}`;
+      if (!roomData) return;
+      const { title: name, users, maxUsers } = roomData;
+      if (users.length === maxUsers) {
+        removeRoomElement(name);
+        return;
+      }
+      const numberOfUsers = `${users.length}/${maxUsers}`;
       updateNumberOfUsersInRoom({
-        name: roomData.title,
+        name,
         numberOfUsers,
       });
     });

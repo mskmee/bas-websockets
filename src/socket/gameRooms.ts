@@ -43,10 +43,5 @@ export default (io: Server) => {
       io.to(title).except(socket.id).emit('new-user', user);
       io.emit('room-update', room);
     });
-
-    socket.on('change-user-status', (title: string, user: string) => {
-      const updateStatus = app.changeUserReadyStatus(title, user);
-      io.to(title).emit('update-user-status', updateStatus);
-    });
   });
 };
