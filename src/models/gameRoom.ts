@@ -7,34 +7,26 @@ export class GameRooms {
 
   constructor() {
     this.rooms = new Map();
-    this.rooms.set('room1', {
-      isGameStart: false,
-      id: 'room1',
-      title: 'Room 1',
-      users: [],
-      maxUsers: MAXIMUM_USERS_FOR_ONE_ROOM,
-    });
-    console.log(this.rooms);
   }
 
-  createRoom(title: string, id: string) {
+  createRoom(title: string, user: IGameUser) {
     const newRoom: IGameRoom = {
-      id,
       isGameStart: false,
       title,
-      users: [],
+      users: [user],
       maxUsers: MAXIMUM_USERS_FOR_ONE_ROOM,
     };
     this.rooms.set(title, newRoom);
+    return newRoom;
   }
 
-  removeRoom(title: string) {
+  deleteRoom(title: string) {
     this.rooms.delete(title);
   }
 
-  getRoom(title: string) {
+  getRoom = (title: string) => {
     return this.rooms.get(title);
-  }
+  };
 
   getRooms() {
     return this.rooms;
@@ -44,8 +36,27 @@ export class GameRooms {
     const room = this.rooms.get(title);
     if (room && room.users.length < MAXIMUM_USERS_FOR_ONE_ROOM) {
       room.users.push(user);
-      return true;
     }
-    return false;
+    return this.rooms.get(title);
   }
+
+  leaveRoom = (title: string, userId: string) => {
+    const room = this.getRoom(title);
+    if (!room) return;
+    const updateUsers = room.users.filter((user) => user.id !== userId);
+    this.rooms.set(title, { ...room, users: updateUsers });
+    return this.getRoom(title);
+  };
+
+  findAndDeleteUser = (name: string) => {
+    for (const [title, room] of this.rooms) {
+      const userIndex = room.users.findIndex((user) => user.name === name);
+      if (userIndex !== -1) {
+        room.users.splice(userIndex, 1);
+        if (!room.users.length) {
+          this.deleteRoom(title);
+        }
+      }
+    }
+  };
 }

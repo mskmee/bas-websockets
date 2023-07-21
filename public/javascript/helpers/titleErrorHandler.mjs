@@ -7,7 +7,6 @@ export const titleErrorHandler = (message, isRoom = false) => {
         sessionStorage.setItem('username', '');
         window.location.replace('/login');
       };
-  console.log(onClose);
   showMessageModal({
     message,
     onClose,

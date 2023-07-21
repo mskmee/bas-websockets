@@ -18,7 +18,7 @@ export default (io: Server) => {
     socket.emit('rooms', app.getRoomsForEnter());
     console.log(app.users.users);
     socket.on('disconnect', () => {
-      app.removeUser(name);
+      app.disconnectUser(name);
     });
   });
 };

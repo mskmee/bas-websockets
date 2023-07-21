@@ -1,4 +1,4 @@
-import { lobbyController } from './controllers/lobbyController.mjs';
+import { MainController } from './controllers/mainController.mjs';
 import { titleErrorHandler } from './helpers/titleErrorHandler.mjs';
 
 const username = sessionStorage.getItem('username');
@@ -8,12 +8,12 @@ if (!username) {
 }
 
 const socket = io('', { query: { username } });
-lobbyController.init();
+const controller = new MainController(socket);
 
 socket.on('name-error', (message) => {
   titleErrorHandler(message);
 });
 
 socket.on('rooms', (data) => {
-  lobbyController.renderRooms(data);
+  controller.lobbyController.renderRooms(data);
 });

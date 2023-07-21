@@ -20,8 +20,9 @@ class App {
     return true;
   };
 
-  removeUser = (name: string) => {
+  disconnectUser = (name: string) => {
     this.users.removeUser = name;
+    this.rooms.findAndDeleteUser(name);
   };
 
   getRoomsForEnter = () => {
@@ -34,16 +35,24 @@ class App {
     this.rooms.addUser(roomId, user);
   };
 
-  addRoom = (roomId: string, title: string) => {
-    if (this.rooms.getRoom(title)) {
-      return false;
-    }
-    this.rooms.createRoom(title, roomId);
-    return true;
+  addRoom = (title: string, user: IGameUser) => {
+    return this.rooms.createRoom(title, user);
+  };
+
+  leaveFromRoom = (title: string, userId: string) => {
+    return this.rooms.leaveRoom(title, userId);
+  };
+
+  isRoomExist = (title: string) => {
+    return this.rooms.getRoom(title);
   };
 
   getRoomByTitle = (title: string) => {
     return this.rooms.getRoom(title);
+  };
+
+  joinUserToRoom = (title: string, user: IGameUser) => {
+    return this.rooms.addUser(title, user);
   };
 }
 
