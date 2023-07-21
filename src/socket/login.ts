@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import { app } from '../app';
 import { createErrorMessage } from '../helpers/createErrorMessage';
+import { updateDeleteRoom } from '../helpers/updateDeleteRoomEvent';
 
 export default (io: Server) => {
   io.on('connect', (socket) => {
@@ -18,7 +19,10 @@ export default (io: Server) => {
     socket.emit('rooms', app.getRoomsForEnter());
     console.log(app.users.users);
     socket.on('disconnect', () => {
-      app.disconnectUser(name);
+      const room = app.disconnectUser(name);
+      if (!room) return;
+      const isRoomDelete = updateDeleteRoom(io, room);
+      isRoomDelete && app.rooms.deleteRoom(room.title);
     });
   });
 };

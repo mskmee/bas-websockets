@@ -22,7 +22,7 @@ class App {
 
   disconnectUser = (name: string) => {
     this.users.removeUser = name;
-    this.rooms.findAndDeleteUser(name);
+    return this.rooms.findAndDeleteUser(name);
   };
 
   getRoomsForEnter = () => {

@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { app } from '../app';
 import { createErrorMessage } from '../helpers/createErrorMessage';
 import { IGameUser } from '../types/interfaces/IGameUser';
+import { updateDeleteRoom } from '../helpers/updateDeleteRoomEvent';
 
 export default (io: Server) => {
   io.on('connection', (socket) => {
@@ -23,12 +24,8 @@ export default (io: Server) => {
     socket.on('room-leave', (title, id) => {
       const room = app.leaveFromRoom(title, id);
       if (!room) return;
-      if (room.users.length) {
-        io.emit('room-update', room);
-        return;
-      }
-      io.emit('room-delete', room);
-      app.rooms.deleteRoom(title);
+      const isRoomDelete = updateDeleteRoom(io, room);
+      isRoomDelete && app.rooms.deleteRoom(title);
     });
 
     socket.on('join-room', (title: string) => {

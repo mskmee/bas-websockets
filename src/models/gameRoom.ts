@@ -49,13 +49,11 @@ export class GameRooms {
   };
 
   findAndDeleteUser = (name: string) => {
-    for (const [title, room] of this.rooms) {
+    for (const room of this.rooms.values()) {
       const userIndex = room.users.findIndex((user) => user.name === name);
       if (userIndex !== -1) {
         room.users.splice(userIndex, 1);
-        if (!room.users.length) {
-          this.deleteRoom(title);
-        }
+        return room;
       }
     }
   };
