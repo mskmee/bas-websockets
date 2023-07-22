@@ -1,5 +1,6 @@
 #rooms-wrapper {
-  display: flex
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #add-room-btn {
@@ -27,7 +28,7 @@
 }
 
 .join-btn {
-  background-color:var(--main-button-background-color);
+  background-color: var(--main-button-background-color);
   border: 1px solid var(--main-button-border-color);
   padding: 5px 20px;
 }

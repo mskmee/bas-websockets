@@ -1,8 +1,7 @@
 import { Server } from 'socket.io';
-import * as config from './config';
+import login from './login';
+import gameRooms from './gameRooms';
 
 export default (io: Server) => {
-	io.on('connection', socket => {
-		const username = socket.handshake.query.username;
-	});
+  login(io), gameRooms(io);
 };
