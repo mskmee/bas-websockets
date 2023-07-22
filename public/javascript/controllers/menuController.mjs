@@ -78,7 +78,9 @@ export class MenuController {
         numberOfUsers,
       });
     });
-    this.socket.on('joined-room', (room) => this.toggleJoinLobby(room.title));
+    this.socket.on('joined-room', (room) =>
+      this.toggleJoinLobby(room.title || '')
+    );
     this.socket.on('room-delete', (room) => removeRoomElement(room.title));
   };
 

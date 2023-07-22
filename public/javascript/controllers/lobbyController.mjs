@@ -9,6 +9,7 @@ export class LobbyController {
     this.socket = socket;
     this.usersWrapper = document.getElementById('users-wrapper');
     this.readyBtn = document.getElementById('ready-btn');
+    this.roomTitle = document.getElementById('room-name');
     this.userName = sessionStorage.getItem('username');
     this.roomName = '';
   }
@@ -27,6 +28,7 @@ export class LobbyController {
 
   renderRoomUsers = (room) => {
     this.roomName = room.title;
+    this.roomTitle.textContent = room.title;
     room.users.forEach((user) => this.renderUser(user));
   };
 
