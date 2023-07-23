@@ -56,7 +56,9 @@ export class GameController {
   };
 
   getGameText = async (id) => {
-    const response = await fetch(`http://localhost:3002/game/texts/${id}`);
+    const response = await fetch(
+      `https://bas-websocket.onrender.com/game/texts/${id}`
+    );
     const data = await response.json();
     this.textContainer.innerHTML = '';
     const dataArr = data.text.split('');
