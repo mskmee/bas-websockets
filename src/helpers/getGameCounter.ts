@@ -10,7 +10,7 @@ export const getGameTimer = (
   const msInSecond = 1000;
   return new Promise<void>((resolve) => {
     const interval = setInterval(() => {
-      if (timer > 0) {
+      if (timer > 1) {
         timer--;
         io.to(title).emit(event, timer);
       } else {

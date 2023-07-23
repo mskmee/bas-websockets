@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import socketHandler from './socket';
 import routes from './routes';
 import { STATIC_PATH, PORT } from './config';
+import textData from './data';
 
 const app = express();
 const httpServer = new http.Server(app);
@@ -12,6 +13,11 @@ const socketIo = new Server(httpServer);
 app.use(express.static(STATIC_PATH));
 
 routes(app);
+
+app.get('/game/texts/:id', (req, res) => {
+  const id = req.params.id;
+  res.json({ text: textData.texts[id] });
+});
 
 app.get('*', (req, res) => res.redirect('/login'));
 

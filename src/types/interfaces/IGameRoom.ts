@@ -5,4 +5,5 @@ export interface IGameRoom {
   title: string;
   users: IGameUser[];
   maxUsers: number;
+  gameResult: string[];
 }

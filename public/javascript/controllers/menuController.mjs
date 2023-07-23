@@ -29,6 +29,7 @@ export class MenuController {
           id: this.socket.id,
           name: this.userName,
           isUserReady: false,
+          progress: 0,
         });
       },
     });
@@ -61,33 +62,38 @@ export class MenuController {
     this.toggleJoinLobby('');
   };
 
+  roomUpdate = (roomData) => {
+    if (!roomData) return;
+    const { title: name, users, maxUsers, isGameStart } = roomData;
+    if (isGameStart) {
+      return removeRoomElement(name);
+    }
+    if (users.length === maxUsers) {
+      return removeRoomElement(name);
+    }
+    const numberOfUsers = `${users.length}/${maxUsers}`;
+    updateNumberOfUsersInRoom({
+      name,
+      numberOfUsers,
+    });
+  };
+
   socketEvents = () => {
     this.socket.on('rooms', (data) => this.renderRooms(data));
     this.socket.on('new-room', (newRoom) => this.renderRooms([newRoom]));
     this.socket.on('room-error', (data) => titleErrorHandler(data, true));
-    this.socket.on('room-update', (roomData) => {
-      if (!roomData) return;
-      const { title: name, users, maxUsers } = roomData;
-      if (users.length === maxUsers) {
-        removeRoomElement(name);
-        return;
-      }
-      const numberOfUsers = `${users.length}/${maxUsers}`;
-      updateNumberOfUsersInRoom({
-        name,
-        numberOfUsers,
-      });
-    });
+    this.socket.on('room-update', (roomData) => this.roomUpdate(roomData));
     this.socket.on('joined-room', (room) =>
       this.toggleJoinLobby(room.title || '')
     );
+    this.socket.on('room-game-end', (room) => this.renderRooms([room]));
+
     this.socket.on('room-delete', (room) => removeRoomElement(room.title));
   };
 
   init = () => {
     this.socketEvents();
     this.createRoomBtn.addEventListener('click', this.createRoom);
-    document.addEventListener('beforeunload', () => socket.disconnect());
     this.leaveLobbyBtn.addEventListener('click', this.leaveRoom);
   };
 }

@@ -1,8 +1,7 @@
 import { Server } from 'socket.io';
 import { app } from '../app';
-import { getGameTimer } from '../helpers/getGameCounter';
-import { SECONDS_FOR_GAME, SECONDS_TIMER_BEFORE_START_GAME } from './config';
-import { getRandomText } from '../helpers/getRandomText';
+import { IUpdateUserGameStatus } from '../types/interfaces/IUpdateUserGameStatus';
+import { startGame } from '../helpers/startGame';
 
 export default (io: Server) => {
   io.on('connect', (socket) => {
@@ -13,15 +12,22 @@ export default (io: Server) => {
       if (!room) return;
       const isPlayersReady = room.users.every((user) => user.isUserReady);
       if (isPlayersReady && room.users.length > 1) {
-        await getGameTimer(
-          io,
-          room.title,
-          'game-counter-start',
-          SECONDS_TIMER_BEFORE_START_GAME
-        );
-        io.to(room.title).emit('game-start', getRandomText());
-        await getGameTimer(io, room.title, 'game-counter', SECONDS_FOR_GAME);
+        startGame(app, io, room);
       }
+    });
+    socket.on('game-update', (data: IUpdateUserGameStatus) => {
+      const room = app.updateGameStatus(data);
+      if (!room) return;
+      io.to(data.room).emit('game-update', room.users);
+      const isPlayersFinished = room.users.every(
+        (user) => user.progress === 100
+      );
+      if (!isPlayersFinished) return;
+      io.to(data.room).emit('game-end', app.getGameResult(room.title));
+      io.except(data.room).emit(
+        'room-game-end',
+        app.resetRoomGameStats(room.title)
+      );
     });
   });
 };

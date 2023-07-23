@@ -29,6 +29,7 @@ export class LobbyController {
   renderRoomUsers = (room) => {
     this.roomName = room.title;
     this.roomTitle.textContent = room.title;
+    this.readyBtn.textContent = 'READY';
     room.users.forEach((user) => this.renderUser(user));
   };
 
@@ -40,11 +41,20 @@ export class LobbyController {
     }
   };
 
+  changeReadyStatus = (user) => {
+    if (this.userName === user.username) {
+      this.readyBtn.textContent = user.ready ? 'NOT READY' : 'READY';
+    }
+    changeReadyStatus(user);
+  };
+
   socketEvents = () => {
     this.socket.on('new-user', (user) => this.renderUser(user));
     this.socket.on('joined-room', (room) => this.renderRoomUsers(room));
     this.socket.on('room-leave', (userName) => this.leaveRoom(userName));
-    this.socket.on('update-user-status', (user) => changeReadyStatus(user));
+    this.socket.on('update-user-status', (user) =>
+      this.changeReadyStatus(user)
+    );
   };
   init = () => {
     this.socketEvents();
